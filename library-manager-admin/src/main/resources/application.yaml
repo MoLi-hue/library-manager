@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: library-manager-admin
+  logging:
+    system: org.springframework.boot.logging.log4j2.Log4j2LoggingSystem
+  profiles:
+    active: dev
+
+logging:
+  config: classpath:log4j2.xml
+
+server:
+  servlet:
+    context-path: '/api/library'
+
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 50MB
+    max-request-size: 50MB
+
+mvc:
+  hiddenmethod:
+    filter:
+      enabled: true
+
+mybatis-plus:
+  global-config:
+    banner: false
+    db-config:
+      # 主键自增
+      id-type: auto
+      # 表名下划线命名
+      table-underline: true
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    use-generated-keys: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true

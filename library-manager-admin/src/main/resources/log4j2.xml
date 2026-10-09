@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="https://logging.apache.org/xml/ns"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="
+                   https://logging.apache.org/xml/ns
+                   https://logging.apache.org/xml/ns/log4j-config-2.xsd">
+    <Properties>
+        <Property name="log_charset" value="UTF-8" />
+        <Property name="filename" value="library" />
+        <Property name="log_path" value="/library/logs" />
+        <Property name="library_log_encoding" value="UTF-8" />
+        <Property name="library_log_size" value="200MB" />
+        <Property name="data_level" value="INFO" />
+        <Property name="library_log_time" value="5d" />
+        <Property name="log_pattern" value="%-d{yyyy-MM-dd HH:mm:ss} %-5r [%t][%-5p] %c %x - %m%n" />
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${log_pattern}"/>
+            <filters>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            </filters>
+        </Console>
+
+        <RollingRandomAccessFile name="LIBRARY_FILE"
+                                 fileName="${log_path}/${filename}.log"
+                                 filePattern="${log_path}/${filename}_%d{yyyy-MM-dd}_%i.log.gz">
+            <PatternLayout pattern="[%style{%d{yyyy-MM-dd HH:mm:ss.SSS}}{bright,green}] [%-5p] [%t] [%c{1}] %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${library_log_size}" />
+            </Policies>
+        </RollingRandomAccessFile>
+
+        <RollingFile name="RollingFileError"
+                                 fileName="${log_path}/error.log"
+                                 filePattern="${log_path}/${filename}-ERROR-%d{yyyy-MM-dd}_%i.log.gz">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout pattern="${log_pattern}"/>
+            <Policies>
+                <!-- 默认 1 小时滚动 -->
+                <TimeBasedTriggeringPolicy interval="1" />
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- AsyncLogger/Logger元素additivity属性：控制日志事件的传递行为，
+        一条日志在被当前 Logger 处理完后，是否还要继续向上传递给其父级 Logger（直到 Root Logger）的 Appender -->
+        <AsyncLogger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+        <AsyncLogger name="org.mybatis" level="INFO" additivity="false">
+            <AppenderRef ref="Console" />
+        </AsyncLogger>
+        <AsyncLogger name="me.alice.admin" level="INFO" additivity="false">
+            <AppenderRef ref="Console" level="INFO" />
+            <AppenderRef ref="LIBRARY_FILE" />
+            <AppenderRef ref="RollingFileError" />
+        </AsyncLogger>
+        <AsyncRoot level="INFO">
+            <AppenderRef ref="Console" level="INFO" />
+            <AppenderRef ref="LIBRARY_FILE" />
+            <AppenderRef ref="RollingFileError" />
+        </AsyncRoot>
+    </Loggers>
+
+</Configuration>
+
